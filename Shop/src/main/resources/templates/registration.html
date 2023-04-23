@@ -6,18 +6,32 @@
 </head>
 <body>
 <h3>Регистрация</h3>
-<form method="post" th:actioin="@{/registration}" th:object="${person}">
+<form method="post" th:action="@{/registration}" th:object="${person}">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-    <label for="login">Введите логин: </label>
-    <input type="text" th:field="*{login}" id="login">
+    <label for="login">Введите логин:</label>
+    <input type="text" th:field="*{login}" id="login"><br>
     <div style="color: red" th:if="${#fields.hasErrors('login')}" th:errors="*{login}"></div>
     <br>
-    <label for="password">Введите пароль: </label>
-    <input type="password" th:field="*{password}" id="password">
+    <label for="password">Введите пароль:</label>
+    <input type="password" th:field="*{password}" id="password"><br>
     <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
     <br>
+    <label for="nameUser">Укажите Ваше имя:</label>
+    <input type="text" th:field="*{nameUser}" id="nameUser"><br>
+    <div style="color: red" th:if="${#fields.hasErrors('nameUser')}" th:errors="*{nameUser}"></div>
+    <br>
+
+    <label for="phoneNumber">Номер вашего телефона:</label>
+    <input type="text" th:field="*{phoneNumber}" id="phoneNumber"><br>
+    <div style="color: red" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+    <br>
+    <label for="email">Ваше e-mail:</label>
+    <input type="text" th:field="*{email}" id="email"><br>
+    <div style="color: red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+    <br><br>
     <input type="submit" value="Зарегистрироваться">
 </form>
+<br>
 <a href="/authentication">Вход</a>
 </body>
 </html>

@@ -2,15 +2,14 @@ package com.example.springsecurityapplication.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import org.springframework.stereotype.Controller;
+
 
 import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Person")
+@Table(name = "person")
 public class Person {
     @Id
     @Column(name = "id")
@@ -29,12 +28,38 @@ public class Person {
     @Column(name = "role")
     private String role;
 
+    @NotEmpty(message = "Ваше имя")
+    @Column(name = "name_user")
+    private String nameUser;
+
+    @NotEmpty(message = "Номер вашего телефона")
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @NotEmpty(message = "Электронная почта")
+    @Column(name = "email")
+    private String email;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return id == person.id && Objects.equals(login, person.login) && Objects.equals(password, person.password);
+    }
     @ManyToMany()
     @JoinTable(name = "product_cart", joinColumns = @JoinColumn(name = "person_id"),inverseJoinColumns = @JoinColumn(name = "product_id"))
     private List<Product> productList;
 
     @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
     private List<Order> orderList;
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, login, password);
+    }
 
     public int getId() {
         return id;
@@ -60,24 +85,35 @@ public class Person {
         this.password = password;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Person person = (Person) o;
-        return id == person.id && Objects.equals(login, person.login) && Objects.equals(password, person.password);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, login, password);
-    }
-
     public String getRole() {
         return role;
     }
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getNameUser() {
+        return nameUser;
+    }
+
+    public void setNameUser(String nameUser) {
+        this.nameUser = nameUser;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

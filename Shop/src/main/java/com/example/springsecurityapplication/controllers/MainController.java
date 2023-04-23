@@ -1,13 +1,11 @@
 package com.example.springsecurityapplication.controllers;
 
 import com.example.springsecurityapplication.enumm.Status;
-import com.example.springsecurityapplication.models.Cart;
-import com.example.springsecurityapplication.models.Order;
-import com.example.springsecurityapplication.models.Person;
-import com.example.springsecurityapplication.models.Product;
+import com.example.springsecurityapplication.models.*;
 import com.example.springsecurityapplication.repositories.CartRepository;
 import com.example.springsecurityapplication.repositories.OrderRepository;
 import com.example.springsecurityapplication.repositories.ProductRepository;
+import com.example.springsecurityapplication.repositories.OrderPersonRepository;
 import com.example.springsecurityapplication.security.PersonDetails;
 import com.example.springsecurityapplication.services.PersonService;
 import com.example.springsecurityapplication.services.ProductService;
@@ -37,39 +35,31 @@ public class MainController {
     private final CartRepository cartRepository;
 
     private final OrderRepository orderRepository;
-
-    public MainController(ProductRepository productRepository, PersonValidator personValidator, PersonService personService, ProductService productService, CartRepository cartRepository, OrderRepository orderRepository) {
-        this.productRepository = productRepository;
+    private final OrderPersonRepository orderPersonRepository;
+    public MainController(PersonValidator personValidator, PersonService personService, ProductService productService, ProductRepository productRepository, CartRepository cartRepository, OrderRepository orderRepository, OrderPersonRepository orderPersonRepository) {
         this.personValidator = personValidator;
         this.personService = personService;
         this.productService = productService;
+        this.productRepository = productRepository;
         this.cartRepository = cartRepository;
         this.orderRepository = orderRepository;
+        this.orderPersonRepository = orderPersonRepository;
     }
 
     @GetMapping("/person account")
     public String index(Model model){
         // Получаем объект аутентификации -> с помощью SpringContextHolder обращаемся к контексту и на нем вызываем метод аутентификации. Из сессии текущего пользователя получаем объект, который был положен в данную сессию после аутентификации пользователя
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();//получаем объект аутентифкации
         PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
         String role = personDetails.getPerson().getRole();
+        String nameUser = personDetails.getPerson().getNameUser();
         if(role.equals("ROLE_ADMIN")){
             return "redirect:/admin";
         }
-//        System.out.println(personDetails.getPerson());
-//        System.out.println("ID пользователя: " + personDetails.getPerson().getId());
-//        System.out.println("Логин пользователя: " + personDetails.getPerson().getLogin());
-//        System.out.println("Пароль пользователя: " + personDetails.getPerson().getPassword());
-//        System.out.println(personDetails);
+        model.addAttribute("personName", nameUser);
         model.addAttribute("products", productService.getAllProduct());
         return "/user/index";
     }
-
-    //    @GetMapping("/registration")
-//    public String registration(Model model){
-//        model.addAttribute("person", new Person());
-//        return "registration";
-//    }
 
     @GetMapping("/registration")
     public String registration(@ModelAttribute("person") Person person){
@@ -134,8 +124,13 @@ public class MainController {
         model.addAttribute("value_search", search);
         model.addAttribute("value_price_ot", ot);
         model.addAttribute("value_price_do", Do);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication.isAuthenticated()){
+            PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
+            model.addAttribute("personName",personDetails.getPerson().getNameUser());
+            return "/user/index";
+        }
         return "/product/product";
-
     }
 
     @GetMapping("/cart/add/{id}")
@@ -180,15 +175,14 @@ public class MainController {
 
     @GetMapping("/cart/delete/{id}")
     public String deleteProductFromCart(Model model, @PathVariable("id") int id){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Product product = productService.getProductId(id); //получаем id продукта, который хотим положить в корзину
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); //получаем пользователя который аутентифицировался
         PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
-        // Извлекаем id пользователя из объекта
-        int id_person = personDetails.getPerson().getId();
+        int id_person = personDetails.getPerson().getId(); //получаем id аутентифицированного пользователя
+
         List<Cart> cartList = cartRepository.findByPersonId(id_person);
         List<Product> productList = new ArrayList<>();
-
-        // Получаем продукты из корзины по id товара
-        for (Cart cart: cartList) {
+        for (Cart cart: cartList){ // получаем продукты корзины по его id
             productList.add(productService.getProductId(cart.getProductId()));
         }
         cartRepository.deleteCartByProductId(id);
@@ -222,6 +216,10 @@ public class MainController {
             orderRepository.save(newOrder);
             cartRepository.deleteCartByProductId(product.getId());
         }
+        if (price>0){
+            OrderPerson newOrderPerson = new OrderPerson(uuid,personDetails.getPerson(),price,Status.Оформлен);
+            orderPersonRepository.save(newOrderPerson);
+        }
         return "redirect:/orders";
     }
 
@@ -232,6 +230,17 @@ public class MainController {
         List<Order> orderList = orderRepository.findByPerson(personDetails.getPerson());
          model.addAttribute("orders", orderList);
          return "/user/orders";
+    }
+
+    @GetMapping("/orders/delete")
+    public String orderDelete(Model model){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); //получаем пользователя который аутентифицыровался
+        PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
+        int id_person = personDetails.getPerson().getId(); //получаем id-шник аутентифицированного пользователя
+        orderRepository.deleteOrdersByPersonId(id_person);//удаляем лист заказов по id пользователя
+        List<Order> orderList = orderRepository.findByPerson(personDetails.getPerson()); //получаем лист заказов по пользователю
+        model.addAttribute("orders",orderList);//отправляем в html-ку пустой лист
+        return "/user/orders";
     }
 
 

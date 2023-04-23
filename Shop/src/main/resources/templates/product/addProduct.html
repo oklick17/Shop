@@ -23,7 +23,7 @@
     <br>
     <br>
     <label for="warehouse">Введите cклад, на котором расположен товар: </label>
-    <input type="text" th:field="*{warehouse}" placeholder="Cклад" id="warehouse">
+    <input type="text" th:field="*{warehouse}" placeholder="склад" id="warehouse">
     <div style="color: red" th:if="${#fields.hasErrors('warehouse')}" th:errors="*{warehouse}"></div>
     <br>
     <br>
@@ -50,6 +50,7 @@
     <br>
     <br>
     <input type="submit" value="Добавить">
+
 </form>
 </body>
 </html>

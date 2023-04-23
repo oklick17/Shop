@@ -1,47 +1,36 @@
 package com.example.springsecurityapplication.models;
 
 import com.example.springsecurityapplication.enumm.Status;
+import jakarta.persistence.Entity;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "orders")
-public class Order {
+@Table(name = "order_person")
+public class OrderPerson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
     private String number;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    private Product product;
-
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private Person person;
-
-    private int count;
     private float price;
     private Status status;
     private LocalDateTime dateTime;
 
-
-
     @PrePersist
-    private void init(){
+    private void init() {
         dateTime = LocalDateTime.now();
     }
 
-    public Order(String number, Product product, Person person, int count, float price, Status status) {
+    public OrderPerson(String number, Person person, float price, Status status) {
         this.number = number;
-        this.product = product;
         this.person = person;
-        this.count = count;
         this.price = price;
         this.status = status;
     }
 
-    public Order() {
+    public OrderPerson() {
     }
 
     public int getId() {
@@ -60,28 +49,12 @@ public class Order {
         this.number = number;
     }
 
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
     public Person getPerson() {
         return person;
     }
 
     public void setPerson(Person person) {
         this.person = person;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
     public float getPrice() {
@@ -92,14 +65,6 @@ public class Order {
         this.price = price;
     }
 
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
-
     public Status getStatus() {
         return status;
     }
@@ -107,4 +72,13 @@ public class Order {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
 }
+
